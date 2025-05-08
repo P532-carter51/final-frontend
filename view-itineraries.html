@@ -42,7 +42,7 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">FlavorFind</a>
+            <a class="navbar-brand" href="index.html">FlavorFind</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -50,13 +50,13 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="view-itineraries.html">View Itineraries</a>
+                        <a class="nav-link" href="search.html">Search Places</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="create-itinerary.html">Create Itinerary</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#about">About</a>
+                        <a class="nav-link" href="view-itineraries.html">View Itineraries</a>
                     </li>
                 </ul>
             </div>
@@ -96,10 +96,10 @@
                     const itineraryCard = `
                         <div class="col-md-4">
                             <div class="itinerary-card">
-                                <img src="https://via.placeholder.com/400x200" class="card-img-top itinerary-card-img" alt="${itinerary.name}">
+                                <img src="${itinerary.imageUrl || 'https://via.placeholder.com/400x200'}" class="card-img-top itinerary-card-img" alt="${itinerary.name}">
                                 <div class="card-body">
                                     <h5 class="itinerary-header">${itinerary.name}</h5>
-                                    <p class="itinerary-description">${itinerary.description}</p>
+                                    <p class="itinerary-description">${itinerary.description || 'No description available.'}</p>
                                     <button class="btn btn-info view-button" onclick="viewItinerary(${itinerary.id})">View Itinerary</button>
                                 </div>
                             </div>
