@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlavorFind - View Itineraries</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .itinerary-card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .itinerary-card-img {
+            max-height: 200px;
+            object-fit: cover;
+        }
+
+        .itinerary-header {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .itinerary-description {
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+
+        .view-button {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">FlavorFind</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="view-itineraries.html">View Itineraries</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="create-itinerary.html">Create Itinerary</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">About</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- View Itineraries Section -->
+    <section id="view-itineraries" class="py-5 text-center">
+        <div class="container">
+            <h2 class="mb-4">Your Itineraries</h2>
+            <div id="itineraryResults" class="row">
+                <!-- Itineraries will appear here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3">
+        <p>&copy; 2025 FlavorFind | All Rights Reserved</p>
+    </footer>
+
+    <!-- Bootstrap JS & Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+
+    <script>
+        // Fetch and display the user's itineraries
+        fetch('https://flavorfind-backend.onrender.com/api/itineraries')
+            .then(response => response.json())
+            .then(itineraries => {
+                console.log("Fetched itineraries:", itineraries);
+
+                const itineraryResults = document.getElementById('itineraryResults');
+                itineraryResults.innerHTML = '';
+
+                itineraries.forEach(itinerary => {
+                    const itineraryCard = `
+                        <div class="col-md-4">
+                            <div class="itinerary-card">
+                                <img src="https://via.placeholder.com/400x200" class="card-img-top itinerary-card-img" alt="${itinerary.name}">
+                                <div class="card-body">
+                                    <h5 class="itinerary-header">${itinerary.name}</h5>
+                                    <p class="itinerary-description">${itinerary.description}</p>
+                                    <button class="btn btn-info view-button" onclick="viewItinerary(${itinerary.id})">View Itinerary</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    itineraryResults.innerHTML += itineraryCard;
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching itineraries:', error);
+            });
+
+        // View itinerary details and places
+        function viewItinerary(itineraryId) {
+            // You can modify this to show more details about the itinerary, such as its places
+            console.log('Viewing itinerary with ID:', itineraryId);
+            
+            // For now, just alert the itinerary ID for demonstration purposes
+            alert('Viewing itinerary with ID: ' + itineraryId);
+        }
+    </script>
+
+</body>
+
+</html>

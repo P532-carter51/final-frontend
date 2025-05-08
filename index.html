@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlavorFind - Home</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .hero {
+            background-image: url('assets/travelandfood.jpg'); /* Custom background image */
+            background-size: cover;
+            background-position: center;
+            color: white;
+            text-align: center;
+            padding: 100px 0;
+            position: relative;
+            z-index: 1; /* Ensures the hero content stays on top of the overlay */
+        }
+    
+        /* Add blur effect to the background image only */
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: inherit; /* Inherit background image from .hero */
+            background-size: cover;
+            background-position: center;
+            filter: blur(8px); /* Apply blur to the background */
+            z-index: -1; /* Ensure it's behind the content */
+        }
+    
+        /* Dark overlay */
+        .hero .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* Dark overlay */
+            z-index: -1; /* Ensure the overlay is behind text */
+        }
+    
+        .hero h1 {
+            font-size: 4rem; /* Increase font size */
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #ffdd00; /* Set a contrasting color (Yellow) */
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6); /* Shadow to make the text stand out */
+        }
+    
+        .hero p {
+            font-size: 1.25rem;
+            color: #fff; /* Make the paragraph text white */
+        }
+    
+        .feature-img {
+            max-height: 200px;
+            object-fit: cover;
+            height: 200px;
+        }
+    
+        .feature-section {
+            background-color: #f8f9fa;
+        }
+    
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+    
+        .navbar-brand {
+            font-size: 2rem;
+        }
+    </style>
+    
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">FlavorFind</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="search.html">Search Places</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#itineraries">View Itineraries</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">About</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero text-center py-5">
+        <div class="container">
+            <h1 class="display-4">Explore Delicious Destinations</h1>
+            <p class="lead">For travelers who love good food, discover the best spots wherever you go.</p>
+            <a href="search.html" class="btn btn-light btn-lg">Start Searching</a>
+        </div>
+    </header>
+
+    <!-- About Section -->
+    <section id="about" class="py-5">
+        <div class="container text-center">
+            <h2>About FlavorFind</h2>
+            <p class="lead">FlavorFind is for adventurous travelers who want to experience the best food in new cities. From street food to fine dining, we help you find it all.</p>
+        </div>
+    </section>
+
+    <!-- Featured Food Images Section -->
+    <section class="feature-section py-5">
+        <div class="container text-center">
+            <h2>Featured Food Places</h2>
+            <p class="lead">Taste the world with these handpicked culinary destinations.</p>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card">
+                        <img src="assets/pizza.jpg" class="card-img-top feature-img" alt="Delicious Pizza">
+                        <div class="card-body">
+                            <h5 class="card-title">Delicious Pizza</h5>
+                            <p class="card-text">Try the most flavorful pizza in Chicago.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <img src="assets/sushi.jpg" class="card-img-top feature-img" alt="Sushi Delights">
+                        <div class="card-body">
+                            <h5 class="card-title">Sushi Delights</h5>
+                            <p class="card-text">Experience the freshest sushi in Tokyo.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <img src="assets/tacos.jpg" class="card-img-top feature-img" alt="Authentic Tacos">
+                        <div class="card-body">
+                            <h5 class="card-title">Authentic Tacos</h5>
+                            <p class="card-text">Savor the best tacos in Mexico City.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section id="cta" class="bg-light text-center py-5">
+        <div class="container">
+            <h2>Ready to Explore?</h2>
+            <p class="lead">Search for places, create your itinerary, and enjoy the best food on your travels!</p>
+            <a href="search.html" class="btn btn-primary btn-lg">Find Places</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3">
+        <p>&copy; 2025 FlavorFind | All Rights Reserved</p>
+    </footer>
+
+    <!-- Bootstrap JS & Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+</body>
+
+</html>

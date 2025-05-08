@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlavorFind - Create Itinerary</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .create-itinerary-section,
+        .add-places-section {
+            padding: 50px 0;
+        }
+
+        .category-header {
+            background-color: #f1f1f1;
+            padding: 15px;
+            margin-top: 30px;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-img-top {
+            max-height: 200px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">FlavorFind</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="create-itinerary.html">Create Itinerary</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="search.html">Search Places</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">About</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Create Itinerary Section -->
+    <section id="create-itinerary" class="create-itinerary-section text-center">
+        <div class="container">
+            <h2 class="mb-4">Create a New Itinerary</h2>
+            <form id="createItineraryForm">
+                <div class="mb-3">
+                    <label for="itineraryName" class="form-label">Itinerary Name</label>
+                    <input type="text" class="form-control" id="itineraryName" placeholder="Enter itinerary name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="itineraryDescription" class="form-label">Description</label>
+                    <textarea class="form-control" id="itineraryDescription" rows="3" placeholder="Enter a brief description" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Itinerary</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Add Places Section -->
+    <section id="search-places" class="add-places-section text-center">
+        <div class="container">
+            <h2 class="mb-4">Search and Add Places to Your Itinerary</h2>
+
+            <!-- Search Form -->
+            <form id="searchPlacesForm">
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" id="placeSearch" placeholder="Search for places" aria-label="Search for places" required>
+                    <button class="btn btn-primary" type="submit">Search</button>
+                </div>
+            </form>
+
+            <!-- Display Places -->
+            <div id="placesResults" class="row">
+                <!-- Results will appear here -->
+            </div>
+
+            <!-- Add Place Button -->
+            <button id="addPlaceButton" class="btn btn-success" style="display: none;">Add Selected Place to Itinerary</button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3">
+        <p>&copy; 2025 FlavorFind | All Rights Reserved</p>
+    </footer>
+
+    <!-- Bootstrap JS & Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+
+    <script>
+        // Create Itinerary
+        document.getElementById('createItineraryForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const itineraryName = document.getElementById('itineraryName').value;
+            const itineraryDescription = document.getElementById('itineraryDescription').value;
+
+            const newItinerary = {
+                name: itineraryName,
+                description: itineraryDescription
+            };
+
+            // Send POST request to create the itinerary
+            fetch('https://flavorfind-backend.onrender.com/api/itineraries', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newItinerary),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Itinerary created:', data);
+                // Optionally, show success message or redirect
+                alert('Itinerary Created: ' + data.name);
+            })
+            .catch((error) => {
+                console.error('Error creating itinerary:', error);
+            });
+        });
+
+        // Search and Add Places
+        document.getElementById('searchPlacesForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const searchQuery = document.getElementById('placeSearch').value;
+
+            // Fetch places based on search query
+            fetch(`https://flavorfind-backend.onrender.com/api/places/search?location=${searchQuery}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Places data:', data);
+
+                    const placesResults = document.getElementById('placesResults');
+                    placesResults.innerHTML = '';
+
+                    data.forEach(place => {
+                        const placeCard = `
+                            <div class="col-md-4 mb-4">
+                                <div class="card">
+                                    <img src="${place.imageUrl || 'https://via.placeholder.com/400x200'}" class="card-img-top" alt="${place.name}">
+                                    <div class="card-body">
+                                        <h5 class="card-title">${place.name}</h5>
+                                        <p class="card-text">${place.description || 'No description available'}</p>
+                                        <button class="btn btn-info add-place" data-id="${place.id}">Add to Itinerary</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        placesResults.innerHTML += placeCard;
+                    });
+
+                    // Show "Add Place" button if results are found
+                    document.getElementById('addPlaceButton').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error fetching places:', error);
+                });
+        });
+
+        // Add selected place to itinerary
+        document.getElementById('placesResults').addEventListener('click', function (event) {
+            if (event.target.classList.contains('add-place')) {
+                const placeId = event.target.getAttribute('data-id');
+                console.log('Selected place ID:', placeId);
+
+                const itineraryId = 1; // Replace with the actual itinerary ID
+
+                // Send POST request to add the selected place to an itinerary
+                fetch(`https://flavorfind-backend.onrender.com/api/itineraries/${itineraryId}/add-place`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ placeId: placeId }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Place added:', data);
+                    alert('Place Added: ' + data.name);
+                })
+                .catch((error) => {
+                    console.error('Error adding place:', error);
+                });
+            }
+        });
+    </script>
+
+</body>
+
+</html>
