@@ -48,6 +48,7 @@
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="search.html">Search Places</a></li>
+                    <li class="nav-item"><a class="nav-link" href="create-itinerary.html">Create Itinerary</a></li>
                     <li class="nav-item"><a class="nav-link" href="view-itineraries.html">View Itineraries</a></li>
                 </ul>
             </div>
@@ -97,12 +98,23 @@
                     <button class="btn btn-primary" type="submit">Search</button>
                 </div>
             </form>
+
+            <div id="itineraryPrompt" class="alert alert-warning mt-3" style="display: none;">
+                To add restaurants to your itinerary, please
+                <a href="create-itinerary.html" class="alert-link">create an itinerary</a> first.
+            </div>
         </div>
     </section>
 
     <section id="results" class="py-5">
         <div class="container">
             <h3 class="mb-4">Search Results</h3>
+            <div id="loadingSpinner" class="text-center my-4" style="display: none;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading results...</p>
+            </div>
             <div class="row" id="places"></div>
         </div>
     </section>
@@ -120,9 +132,13 @@
 
         let existingPlaceNames = [];
 
+        if (!itineraryId) {
+            document.getElementById("itineraryPrompt").style.display = "block";
+        }
+
         // Load existing places in itinerary first
         function fetchExistingItineraryPlaces() {
-            fetch(`https://flavorfind-backend.onrender.com/api/itineraries/${itineraryId}`)
+            fetch(`http://localhost:8080/api/itineraries/${itineraryId}`)
                 .then(res => res.json())
                 .then(data => {
                     existingPlaceNames = data.places.map(p => p.name);
@@ -133,7 +149,7 @@
                 });
         }
 
-        fetch("https://flavorfind-backend.onrender.com/api/places/categories?location=Detroit")
+        fetch("http://localhost:8080/api/places/categories?location=Detroit")
             .then(resp => resp.json())
             .then(data => {
                 data.categories.forEach(cat => {
@@ -154,12 +170,17 @@
         document.getElementById('applyFilters').addEventListener('click', applySearch);
 
         function applySearch() {
+            const container = document.getElementById("places");
+            container.innerHTML = ""; // Clear immediately before loading
+
+            document.getElementById("loadingSpinner").style.display = "block"; // Show spinner
+
             const location = document.getElementById("location").value;
             const category = categoryFilter.value;
             const rating = parseFloat(document.getElementById("ratingFilter").value) || null;
             const price = document.getElementById("priceFilter").value;
 
-            let url = `https://flavorfind-backend.onrender.com/api/places/tree?location=${location}`;
+            let url = `http://localhost:8080/api/places/tree?location=${location}`;
             if (category) url += `&category=${encodeURIComponent(category)}`;
             if (rating) url += `&minRating=${rating}`;
             if (price) url += `&price=${price}`;
@@ -167,8 +188,10 @@
             fetch(url)
                 .then(res => res.json())
                 .then(data => {
-                    const container = document.getElementById("places");
-                    container.innerHTML = "";
+                    if (!itineraryId) {
+                        const prompt = document.getElementById("itineraryPrompt");
+                        if (prompt) prompt.style.display = "block";
+                    }
 
                     if (data && data.children) {
                         data.children.forEach(cat => {
@@ -178,52 +201,64 @@
                                 const p = pData.place;
 
                                 const name = p.name || '';
-                                const description = p.description || 'No description provided.';
                                 const address = p.address || 'No address provided';
                                 const category = p.category || 'N/A';
                                 const rating = p.rating || 0.0;
                                 const imageUrl = p.imageUrl || 'https://via.placeholder.com/400x200';
-                                const alreadyAdded = existingPlaceNames.includes(name);
+                                const url = p.url || '#';
 
-                                // Escape all dynamic strings for safe JS injection
                                 const safeName = name.replace(/'/g, "\\'").replace(/"/g, '\\"');
-                                const safeDescription = description.replace(/'/g, "\\'").replace(/"/g, '\\"');
                                 const safeAddress = address.replace(/'/g, "\\'").replace(/"/g, '\\"');
                                 const safeCategory = category.replace(/'/g, "\\'").replace(/"/g, '\\"');
                                 const safeImageUrl = imageUrl.replace(/'/g, "\\'").replace(/"/g, '\\"');
+                                const safeUrl = url.replace(/'/g, "\\'").replace(/"/g, '\\"');
+                                const safeCity = (p.city || '').replace(/'/g, "\\'").replace(/"/g, '\\"');
 
+                                let actionSection = `<p class="text-muted mt-auto">Create an itinerary to add this place.</p>`;
+
+                                if (itineraryId) {
+                                    const alreadyAdded = existingPlaceNames.includes(name);
+                                    actionSection = `
+                            <button class="btn ${alreadyAdded ? 'btn-danger' : 'btn-success'} mt-auto"
+                                onclick="${alreadyAdded
+                                            ? `removePlaceFromItinerary(this, '${safeName}')`
+                                            : `addPlaceToItinerary(this, '${safeName}', '${safeAddress}', '${safeCategory}', ${rating}, '${safeImageUrl}', '${safeUrl}', '${safeCity}')`
+                                        }"
+                            >
+                                ${alreadyAdded ? `🗑 Remove from ${itineraryName}` : `➕ Add to ${itineraryName}`}
+                            </button>`;
+                                }
 
                                 container.innerHTML += `
-            <div class="col-md-4 mb-4">
-              <div class="card h-100">
-                <img src="${imageUrl}" class="card-img-top" alt="${name}">
-                <div class="card-body d-flex flex-column">
-                  <h5 class="card-title">${name}</h5>
-                  <p class="card-text">${description}</p>
-                  <p><strong>Category:</strong> ${category} | <strong>Rating:</strong> ${rating}</p>
-                  <p><strong>Address:</strong> ${address}</p>
-                  <button class="btn ${alreadyAdded ? 'btn-danger' : 'btn-success'} mt-auto"
-                    onclick="${alreadyAdded
-                                        ? `removePlaceFromItinerary(this, '${safeName}')`
-                                        : `addPlaceToItinerary(this, '${safeName}', '${safeAddress}', '${safeCategory}', ${rating}, '${safeImageUrl}', '${safeDescription}')`
-                                    }"
->
-                    ${alreadyAdded ? `🗑 Remove from ${itineraryName}` : `➕ Add to ${itineraryName}`}
-                  </button>
-                </div>
-              </div>
-            </div>`;
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100">
+                                <img src="${imageUrl}" class="card-img-top" alt="${name}">
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title">${name}</h5>
+                                    <p><strong>Category:</strong> ${category} | <strong>Rating:</strong> ${rating}</p>
+                                    <p><strong>Address:</strong> ${address}</p>
+                                    <a href="${url}" target="_blank" class="btn btn-outline-primary btn-sm mb-2">Visit Website</a>
+                                    ${actionSection}
+                                </div>
+                            </div>
+                        </div>`;
                             });
                         });
                     }
+                })
+                .catch(err => {
+                    console.error("Search failed:", err);
+                })
+                .finally(() => {
+                    document.getElementById("loadingSpinner").style.display = "none"; // Hide spinner
                 });
         }
 
-        function addPlaceToItinerary(btn, name, address, category, rating, imageUrl, description) {
-            fetch(`https://flavorfind-backend.onrender.com/api/itineraries/${itineraryId}/add-place`, {
+        function addPlaceToItinerary(btn, name, address, category, rating, imageUrl, url, city) {
+            fetch(`http://localhost:8080/api/itineraries/${itineraryId}/add-place`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, address, category, rating, imageUrl, description })
+                body: JSON.stringify({ name, address, category, rating, imageUrl, url, city })
             })
                 .then(res => {
                     if (!res.ok) throw new Error("Failed to add");
@@ -241,12 +276,12 @@
         }
 
         function removePlaceFromItinerary(btn, placeName) {
-            fetch(`https://flavorfind-backend.onrender.com/api/itineraries/${itineraryId}`)
+            fetch(`http://localhost:8080/api/itineraries/${itineraryId}`)
                 .then(res => res.json())
                 .then(itinerary => {
                     const place = itinerary.places.find(p => p.name === placeName);
                     if (!place?.id) throw new Error("Place not found");
-                    return fetch(`https://flavorfind-backend.onrender.com/api/itineraries/${itineraryId}/places/${place.id}`, {
+                    return fetch(`http://localhost:8080/api/itineraries/${itineraryId}/places/${place.id}`, {
                         method: 'DELETE'
                     });
                 })

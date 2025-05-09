@@ -9,16 +9,18 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .hero {
-            background-image: url('assets/travelandfood.jpg'); /* Custom background image */
+            background-image: url('assets/travelandfood.jpg');
+            /* Custom background image */
             background-size: cover;
             background-position: center;
             color: white;
             text-align: center;
             padding: 100px 0;
             position: relative;
-            z-index: 1; /* Ensures the hero content stays on top of the overlay */
+            z-index: 1;
+            /* Ensures the hero content stays on top of the overlay */
         }
-    
+
         /* Add blur effect to the background image only */
         .hero::before {
             content: '';
@@ -27,13 +29,16 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: inherit; /* Inherit background image from .hero */
+            background-image: inherit;
+            /* Inherit background image from .hero */
             background-size: cover;
             background-position: center;
-            filter: blur(8px); /* Apply blur to the background */
-            z-index: -1; /* Ensure it's behind the content */
+            filter: blur(8px);
+            /* Apply blur to the background */
+            z-index: -1;
+            /* Ensure it's behind the content */
         }
-    
+
         /* Dark overlay */
         .hero .overlay {
             position: absolute;
@@ -41,50 +46,56 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5); /* Dark overlay */
-            z-index: -1; /* Ensure the overlay is behind text */
+            background-color: rgba(0, 0, 0, 0.5);
+            /* Dark overlay */
+            z-index: -1;
+            /* Ensure the overlay is behind text */
         }
-    
+
         .hero h1 {
-            font-size: 4rem; /* Increase font size */
+            font-size: 4rem;
+            /* Increase font size */
             font-weight: bold;
             margin-bottom: 20px;
-            color: #ffdd00; /* Set a contrasting color (Yellow) */
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6); /* Shadow to make the text stand out */
+            color: #ffdd00;
+            /* Set a contrasting color (Yellow) */
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6);
+            /* Shadow to make the text stand out */
         }
-    
+
         .hero p {
             font-size: 1.25rem;
-            color: #fff; /* Make the paragraph text white */
+            color: #fff;
+            /* Make the paragraph text white */
         }
-    
+
         .feature-img {
             max-height: 200px;
             object-fit: cover;
             height: 200px;
         }
-    
+
         .feature-section {
             background-color: #f8f9fa;
         }
-    
+
         .card {
             border: none;
             border-radius: 10px;
             box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
         }
-    
+
         .card-body {
             display: flex;
             flex-direction: column;
             justify-content: space-between;
         }
-    
+
         .navbar-brand {
             font-size: 2rem;
         }
     </style>
-    
+
 </head>
 
 <body>
@@ -102,6 +113,7 @@
                     <li class="nav-item">
                         <a class="nav-link" href="search.html">Search Places</a>
                     </li>
+                    <li class="nav-item"><a class="nav-link" href="create-itinerary.html">Create Itinerary</a></li>
                     <li class="nav-item">
                         <a class="nav-link" href="view-itineraries.html">View Itineraries</a>
                     </li>
@@ -123,7 +135,8 @@
     <section id="about" class="py-5">
         <div class="container text-center">
             <h2>About FlavorFind</h2>
-            <p class="lead">FlavorFind is for adventurous travelers who want to experience the best food in new cities. From street food to fine dining, we help you find it all.</p>
+            <p class="lead">FlavorFind is for adventurous travelers who want to experience the best food in new cities.
+                From street food to fine dining, we help you find it all.</p>
         </div>
     </section>
 

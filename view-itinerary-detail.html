@@ -53,13 +53,18 @@
         </div>
     </nav>
 
+    <div id="errorAlert" class="alert alert-danger alert-dismissible fade show" role="alert" style="display:none;">
+        <strong>Error!</strong> <span id="errorMessage">An error occurred</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
     <div class="container py-4">
         <a href="view-itineraries.html" class="btn btn-secondary mb-3">&larr; Back to Itineraries</a>
 
         <h2 id="itineraryName" class="mb-3"></h2>
         <p><strong>City:</strong> <span id="itineraryCity"></span></p>
         <p><strong>Description:</strong> <span id="itineraryDescription"></span></p>
-        <p><strong>Status:</strong> <span class="badge bg-warning text-dark">Draft</span></p>
+        <p><strong>Status:</strong> <span id="itineraryStatusBadge" class="badge">Loading...</span></p>
 
         <div class="mb-3">
             <button class="btn btn-outline-success me-2" onclick="changeState('confirm')">Confirm</button>
@@ -77,17 +82,23 @@
     </div>
 
     <script>
-        const params = new URLSearchParams(window.location.search);
-        const itineraryId = params.get('id');
+    document.addEventListener('DOMContentLoaded', function () {
+        fetchItineraryDetails();
+    });
 
-        fetch(`https://flavorfind-backend.onrender.com/api/itineraries/${itineraryId}`)
+    const params = new URLSearchParams(window.location.search);
+    const itineraryId = params.get('id');
+
+    function fetchItineraryDetails() {
+        fetch(`http://localhost:8080/api/itineraries/${itineraryId}`)
             .then(res => res.json())
             .then(data => {
                 document.getElementById('itineraryName').textContent = data.name;
                 document.getElementById('itineraryCity').textContent = data.city;
                 document.getElementById('itineraryDescription').textContent = data.description || 'No description provided.';
-
                 document.getElementById('searchLink').href = `search.html?itineraryId=${itineraryId}&city=${encodeURIComponent(data.city)}&itineraryName=${encodeURIComponent(data.name)}`;
+
+                applyUIState(data); // Apply visual UI state
 
                 const placeList = document.getElementById('placeList');
                 placeList.innerHTML = "";
@@ -96,18 +107,33 @@
                     data.places.forEach(place => {
                         const card = document.createElement('div');
                         card.className = 'col-md-4 mb-4';
+                        
+                        const visitedBadge = place.visited
+                        ? `<span class="badge bg-success mb-2">Visited</span>`
+                        : `<span class="badge bg-secondary mb-2">Not Visited</span>`;
+
+                        let buttonsHTML = '';
+                        if (data.stateName === "IN_PROGRESS") {
+                            buttonsHTML = `
+                                <button class="btn btn-success btn-sm mt-2 visited-button" onclick="toggleVisited(${itineraryId}, ${place.id}, true)">Mark as Visited</button>
+                                <button class="btn btn-secondary btn-sm mt-2 visited-button" onclick="toggleVisited(${itineraryId}, ${place.id}, false)">Mark as Not Visited</button>`;
+                        }
+
+                        const showRemove = !["COMPLETED", "CONFIRMED", "IN_PROGRESS"].includes(data.stateName);
+
                         card.innerHTML = `
-              <div class="card">
-                <img src="${place.imageUrl || 'https://via.placeholder.com/400x200'}" class="card-img-top" alt="${place.name}">
-                <div class="card-body">
-                  <h5 class="card-title">${place.name}</h5>
-                  <p class="card-text">${place.description || 'No description available.'}</p>
-                  <p><strong>Category:</strong> ${place.category} | <strong>Rating:</strong> ${place.rating}</p>
-                  <p><strong>Address:</strong> ${place.address || 'N/A'}</p>
-                  <button class="btn btn-danger btn-sm" onclick="removePlace(${place.id})">Remove</button>
-                </div>
-              </div>
-            `;
+                            <div class="card">
+                                <img src="${place.imageUrl || 'https://via.placeholder.com/400x200'}" class="card-img-top" alt="${place.name}">
+                                <div class="card-body">
+                                    <h5 class="card-title">${place.name}</h5>
+                                    ${visitedBadge}
+                                    <p><strong>Category:</strong> ${place.category} | <strong>Rating:</strong> ${place.rating}</p>
+                                    <p><strong>Address:</strong> ${place.address || 'N/A'}</p>
+                                    ${place.url ? `<a href="${place.url}" target="_blank" class="btn btn-outline-primary btn-sm mb-2">Visit Website</a>` : ''}
+                                    ${showRemove ? `<button class="btn btn-danger btn-sm" onclick="removePlace(${place.id})">Remove</button>` : ''}
+                                    ${buttonsHTML}
+                                </div>
+                            </div>`;
                         placeList.appendChild(card);
                     });
                 } else {
@@ -121,46 +147,87 @@
                 console.error("Error loading itinerary:", err);
                 alert("Failed to load itinerary details.");
             });
+    }
 
-        function changeState(action) {
-            fetch(`https://flavorfind-backend.onrender.com/api/itineraries/${itineraryId}/${action}`, {
-                method: 'POST'
+    function changeState(action) {
+        fetch(`http://localhost:8080/api/itineraries/${itineraryId}/${action}`, {
+            method: 'POST'
+        })
+            .then(res => {
+                if (!res.ok) {
+                    return res.json().then(err => {
+                        showError(err.message || "State transition failed.");
+                        throw new Error("Transition failed");
+                    });
+                }
+                return res.json();
             })
-                .then(res => {
-                    if (!res.ok) throw new Error("State change failed");
-                    return res.json();
-                })
-                .then(updated => {
-                    alert(`Itinerary marked as ${updated.stateName}`);
-                    const badge = document.querySelector('span.badge');
-                    badge.textContent = updated.stateName;
-                    badge.className = "badge bg-secondary";
-
-                    if (updated.stateName === "DRAFT") badge.classList.replace("bg-secondary", "bg-warning");
-                    else if (updated.stateName === "CONFIRMED") badge.classList.replace("bg-secondary", "bg-success");
-                    else if (updated.stateName === "IN_PROGRESS") badge.classList.replace("bg-secondary", "bg-primary");
-                    else if (updated.stateName === "COMPLETED") badge.classList.replace("bg-secondary", "bg-dark");
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert("Failed to update state.");
-                });
-        }
-
-        function removePlace(placeId) {
-            fetch(`https://flavorfind-backend.onrender.com/api/itineraries/${itineraryId}/places/${placeId}`, {
-                method: 'DELETE'
+            .then(updated => {
+                alert(`Itinerary marked as ${updated.stateName}`);
+                fetchItineraryDetails(); // Keep everything synced
             })
-                .then(res => {
-                    if (!res.ok) throw new Error("Failed to remove place");
-                    location.reload(); // Refresh the page after removal
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert("Error removing place.");
-                });
+            .catch(err => {
+                console.error("Error updating itinerary:", err);
+            });
+    }
+
+    function applyUIState(data) {
+        const badge = document.getElementById('itineraryStatusBadge');
+        const searchLink = document.getElementById("searchLink");
+        badge.textContent = data.stateName.replace('_', ' ');
+        badge.className = 'badge';
+
+        if (data.stateName === "DRAFT") {
+            badge.classList.add("bg-warning");
+            searchLink.style.display = 'inline-block';
+        } else if (data.stateName === "CONFIRMED") {
+            badge.classList.add("bg-success");
+            searchLink.style.display = 'none';
+        } else if (data.stateName === "IN_PROGRESS") {
+            badge.classList.add("bg-primary");
+            searchLink.style.display = 'none';
+        } else if (data.stateName === "COMPLETED") {
+            badge.classList.add("bg-dark");
+            searchLink.style.display = 'none';
         }
-    </script>
+    }
+
+    function showError(message) {
+        const errorAlert = document.getElementById('errorAlert');
+        const errorMessage = document.getElementById('errorMessage');
+        errorMessage.textContent = message;
+        errorAlert.style.display = 'block';
+        setTimeout(() => errorAlert.style.display = 'none', 5000);
+    }
+
+    function removePlace(placeId) {
+        fetch(`http://localhost:8080/api/itineraries/${itineraryId}/places/${placeId}`, {
+            method: 'DELETE'
+        })
+            .then(res => {
+                if (!res.ok) throw new Error("Failed to remove place");
+                location.reload();
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Error removing place.");
+            });
+    }
+
+    function toggleVisited(itineraryId, placeId, visited) {
+        fetch(`http://localhost:8080/api/itineraries/${itineraryId}/places/${placeId}/${visited ? 'visited' : 'not-visited'}`, {
+            method: 'POST'
+        })
+            .then(res => {
+                if (!res.ok) throw new Error("Failed to mark place as visited");
+                location.reload();
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Error marking place as visited.");
+            });
+    }
+</script>
 
 </body>
 

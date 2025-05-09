@@ -81,6 +81,9 @@
                     <textarea class="form-control" id="itineraryDescription" rows="3"></textarea>
                 </div>
                 <button type="submit" class="btn btn-primary">Create Itinerary</button>
+                <div class="alert alert-info mt-3">
+                    Once you create your itinerary, you'll be redirected to the search page. Restaurants in the city you enter will be shown automatically, and you'll see an <strong>"Add to [Your Itinerary Name]"</strong> button for each place.
+                </div>
             </form>
         </div>
     </section>
@@ -119,6 +122,7 @@
             };
 
             fetch('https://flavorfind-backend.onrender.com/api/itineraries', {
+            fetch('http://localhost:8080/api/itineraries', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
