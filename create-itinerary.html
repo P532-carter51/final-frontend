@@ -132,7 +132,7 @@
                         alert("Failed to save itinerary.");
                         return;
                     }
-                    // window.location.href = `search.html?itineraryId=${data.id}&city=${encodeURIComponent(data.city || '')}`;
+                    window.location.href = `search.html?itineraryId=${data.id}&city=${encodeURIComponent(data.city || '')}&itineraryName=${encodeURIComponent(data.name || '')}`;
                 })
                 .catch(error => {
                     console.error('Error creating itinerary:', error);
