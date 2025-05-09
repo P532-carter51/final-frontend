@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Itinerary Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        .header-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">FlavorFind</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="search.html">Search Places</a></li>
+                    <li class="nav-item"><a class="nav-link" href="create-itinerary.html">Create Itinerary</a></li>
+                    <li class="nav-item"><a class="nav-link" href="view-itineraries.html">View Itineraries</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Itinerary Details -->
+    <div class="container py-4">
+        <a href="view-itineraries.html" class="btn btn-secondary mb-3">&larr; Back to Itineraries</a>
+
+        <h2 id="itineraryName" class="mb-3"></h2>
+        <p><strong>City:</strong> <span id="itineraryCity"></span></p>
+        <p><strong>Description:</strong> <span id="itineraryDescription"></span></p>
+        <p><strong>Status:</strong> <span class="badge bg-warning text-dark">Draft</span></p>
+        <div class="mb-3">
+            <button class="btn btn-outline-success me-2" onclick="changeState('confirm')" data-bs-toggle="tooltip"
+                data-bs-placement="top" title="Confirm your itinerary once you're happy with the plan.">Confirm</button>
+            <button class="btn btn-outline-primary me-2" onclick="changeState('start')" data-bs-toggle="tooltip"
+                data-bs-placement="top" title="Start the itinerary when your journey begins.">Start</button>
+            <button class="btn btn-outline-dark" onclick="changeState('complete')" data-bs-toggle="tooltip"
+                data-bs-placement="top" title="Mark the itinerary as completed once your trip ends.">Complete</button>
+        </div>
+
+        <img id="cityImage" class="header-image my-3" src="" alt="City Image">
+        <h4 class="mt-4">Places in this Itinerary</h4>
+        <ul class="list-group" id="placeList"></ul>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const itineraryId = params.get('id');
+
+        fetch(`https://flavorfind-backend.onrender.com/api/itineraries/${itineraryId}`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('itineraryName').textContent = data.name;
+                document.getElementById('itineraryCity').textContent = data.city;
+                document.getElementById('itineraryDescription').textContent = data.description || 'No description provided.';
+                document.getElementById('cityImage').src = `https://loremflickr.com/800/300/${encodeURIComponent(data.city || 'travel')}`;
+
+                const placeList = document.getElementById('placeList');
+                if (data.places && data.places.length > 0) {
+                    data.places.forEach(place => {
+                        const li = document.createElement('li');
+                        li.className = "list-group-item";
+                        li.textContent = `${place.name} - ${place.address}`;
+                        placeList.appendChild(li);
+                    });
+                } else {
+                    const li = document.createElement('li');
+                    li.className = "list-group-item text-muted";
+                    li.innerHTML = `
+                        No places added yet.<br>
+                        <a href="search.html?itineraryId=${itineraryId}&city=${encodeURIComponent(data.city)}">Search Places</a>
+                            🔍 Search Places to Add
+                        </a>
+                    `;
+                    placeList.appendChild(li);
+                }
+            })
+            .catch(err => {
+                console.error("Error loading itinerary:", err);
+                alert("Failed to load itinerary details.");
+            });
+
+        function changeState(action) {
+            fetch(`https://flavorfind-backend.onrender.com/api/itineraries/${itineraryId}/${action}`, {
+                method: 'POST'
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error("State change failed");
+                    return res.json();
+                })
+                .then(updated => {
+                    alert(`Itinerary marked as ${updated.stateName}`);
+                    const badge = document.querySelector('span.badge');
+                    badge.textContent = updated.stateName;
+                    badge.className = "badge bg-secondary";
+
+                    if (updated.stateName === "DRAFT") badge.classList.replace("bg-secondary", "bg-warning");
+                    else if (updated.stateName === "CONFIRMED") badge.classList.replace("bg-secondary", "bg-success");
+                    else if (updated.stateName === "IN_PROGRESS") badge.classList.replace("bg-secondary", "bg-primary");
+                    else if (updated.stateName === "COMPLETED") badge.classList.replace("bg-secondary", "bg-dark");
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("Failed to update state.");
+                });
+        }
+    </script>
+</body>
+</html>

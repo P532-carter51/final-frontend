@@ -2,11 +2,10 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FlavorFind - Search Places</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
         .search-section {
             background-color: #f8f9fa;
@@ -16,7 +15,7 @@
         .card {
             border: none;
             border-radius: 10px;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .card-img-top {
@@ -36,10 +35,6 @@
             background-color: #f1f1f1;
             padding: 30px 0;
         }
-
-        .filter-section select {
-            margin-bottom: 20px;
-        }
     </style>
 </head>
 
@@ -49,18 +44,10 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="index.html">FlavorFind</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="collapse navbar-collapse">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="search.html">Search Places</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="view-itineraries.html">View Itineraries</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="search.html">Search Places</a></li>
+                    <li class="nav-item"><a class="nav-link" href="view-itineraries.html">View Itineraries</a></li>
                 </ul>
             </div>
         </div>
@@ -71,16 +58,12 @@
         <div class="container">
             <h3>Filter Results</h3>
             <div class="row">
-                <!-- Category Filter -->
                 <div class="col-md-4">
                     <label for="categoryFilter">Category</label>
                     <select id="categoryFilter" class="form-control">
                         <option value="">All Categories</option>
-                        <!-- Categories will be populated dynamically -->
                     </select>
                 </div>
-
-                <!-- Rating Filter -->
                 <div class="col-md-4">
                     <label for="ratingFilter">Rating</label>
                     <select id="ratingFilter" class="form-control">
@@ -90,15 +73,14 @@
                         <option value="5">5.0</option>
                     </select>
                 </div>
-
-                <!-- Price Filter -->
                 <div class="col-md-4">
                     <label for="priceFilter">Price Range</label>
                     <select id="priceFilter" class="form-control">
                         <option value="">All Prices</option>
-                        <option value="$$">$$</option>
-                        <option value="$$$">$$$</option>
-                        <option value="$$$$">$$$$</option>
+                        <option value="1">$</option>
+                        <option value="2">$$</option>
+                        <option value="3">$$$</option>
+                        <option value="4">$$$$</option>
                     </select>
                 </div>
             </div>
@@ -106,129 +88,144 @@
         </div>
     </section>
 
-    <!-- Search Section -->
+    <!-- Search Bar -->
     <section class="search-section text-center">
         <div class="container">
             <h2 class="mb-4">Search for Places</h2>
             <form id="searchForm">
                 <div class="input-group mb-3">
-                    <input type="text" class="form-control" id="location" placeholder="Enter city or location"
-                        aria-label="Enter city" aria-describedby="button-addon2">
-                    <button class="btn btn-primary" type="submit" id="button-addon2">Search</button>
+                    <input type="text" class="form-control" id="location" placeholder="Enter city or location" />
+                    <button class="btn btn-primary" type="submit">Search</button>
                 </div>
             </form>
         </div>
     </section>
 
-    <!-- Results Section -->
+    <!-- Results -->
     <section id="results" class="py-5">
         <div class="container">
             <h3 class="mb-4">Search Results</h3>
-            <div class="row" id="places">
-                <!-- Results will appear here -->
-            </div>
+            <div class="row" id="places"></div>
         </div>
     </section>
 
-    <!-- Footer -->
     <footer class="bg-dark text-white text-center py-3">
         <p>&copy; 2025 FlavorFind | All Rights Reserved</p>
     </footer>
 
-    <!-- Bootstrap JS & Popper.js -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
-
     <script>
-        // Fetch categories and populate the dropdown
+        const params = new URLSearchParams(window.location.search);
+        const itineraryId = params.get("itineraryId");
+        const defaultCity = params.get("city");
+
+        const categoryFilter = document.getElementById("categoryFilter");
+
         fetch("https://flavorfind-backend.onrender.com/api/places/categories?location=Detroit")
-            .then(response => response.json())
+            .then(resp => resp.json())
             .then(data => {
-                const categoryFilter = document.getElementById("categoryFilter");
-                // Add the categories dynamically to the filter
-                data.categories.forEach(category => {
+                data.categories.forEach(cat => {
                     const option = document.createElement("option");
-                    option.value = category;
-                    option.textContent = category;
+                    option.value = cat;
+                    option.textContent = cat;
                     categoryFilter.appendChild(option);
                 });
-            })
-            .catch(error => {
-                console.error("Error fetching categories:", error);
+
+                // ✅ Only auto-search AFTER categories are populated
+                if (defaultCity) {
+                    document.getElementById("location").value = defaultCity;
+                    applySearch();
+                }
             });
 
-        // Fetching the places from the backend API and displaying them
         document.getElementById('searchForm').addEventListener('submit', function (event) {
             event.preventDefault();
-            const location = document.getElementById('location').value;
-            const category = document.getElementById('categoryFilter').value;
-            const rating = document.getElementById('ratingFilter').value;
-            const price = document.getElementById('priceFilter').value;
+            applySearch();
+        });
+
+        document.getElementById('applyFilters').addEventListener('click', function () {
+            applySearch();
+        });
+
+        function applySearch() {
+            const location = document.getElementById("location").value;
+            const category = categoryFilter.value;
+            const ratingRaw = document.getElementById("ratingFilter").value;
+            const rating = ratingRaw ? parseFloat(ratingRaw) : null;
+            const price = document.getElementById("priceFilter").value;
+            
+            console.log("Location:", location);
+            console.log("Category:", category);
+            console.log("Rating (raw):", ratingRaw);
+            console.log("Rating (parsed):", rating);
+            console.log("Price:", price);
 
             let url = `https://flavorfind-backend.onrender.com/api/places/tree?location=${location}`;
-
-            // Add filters to URL if they're selected
-            if (category) url += `&category=${category}`;
-            if (rating) url += `&rating=${rating}`;
+            if (category) url += `&category=${encodeURIComponent(category)}`;
+            if (rating !== null) url += `&minRating=${rating}`;
             if (price) url += `&price=${price}`;
-
-            console.log("Fetching from URL:", url);
+            
+            console.log("Final search URL:", url);
 
             fetch(url)
-                .then(response => {
-                    console.log("API Response status:", response.status);
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
-                    console.log("API Response data:", data);
-
-                    // Clear the previous results
-                    const placesContainer = document.getElementById('places');
-                    placesContainer.innerHTML = '';
-
-                    // Check if the data is valid (with 'children' for categories)
+                    const container = document.getElementById("places");
+                    container.innerHTML = "";
                     if (data && data.children) {
-                        // Loop through the categories (group of places)
-                        data.children.forEach(category => {
-                            console.log("Processing category:", category.name);
+                        data.children.forEach(cat => {
+                            container.innerHTML += `<div class="col-12 category-header"><h4>${cat.name}</h4></div>`;
+                            cat.children.forEach(placeData => {
+                                const p = placeData.place;
+                                const imgUrl = p.imageUrl || 'https://via.placeholder.com/400x200';
+                                const address = p.address || 'No address provided';
 
-                            // Create a header for each category
-                            const categoryHeader = `
-                                <div class="col-12 category-header">
-                                    <h4>${category.name}</h4>
-                                </div>
-                            `;
-                            placesContainer.innerHTML += categoryHeader;
+                                let card = `
+                                <div class="col-md-4 mb-4">
+                                    <div class="card">
+                                    <img src="${imgUrl}" class="card-img-top" alt="${p.name}">
+                                    <div class="card-body">
+                                        <h5 class="card-title">${p.name}</h5>
+                                        <p class="card-text">${p.description || 'No description provided.'}</p>
+                                        <p><strong>Category:</strong> ${p.category} | <strong>Rating:</strong> ${p.rating}</p>`;
 
-                            // Loop through each place in the category
-                            category.children.forEach(placeData => {
-                                const place = placeData.place;
-                                console.log("Processing place:", place.name);
 
-                                const card = `
-                                    <div class="col-md-4">
-                                        <div class="card">
-                                            <img src="${place.imageUrl || 'https://via.placeholder.com/400x200'}" class="card-img-top" alt="${place.name}">
-                                            <div class="card-body">
-                                                <h5 class="card-title">${place.name}</h5>
-                                                <p class="card-text">Experience the best food in ${place.city}.</p>
-                                                <p><strong>Category:</strong> ${place.category} | <strong>Rating:</strong> ${place.rating}</p>
-                                                <button class="btn btn-info add-place" data-id="${place.id}">+ Add to Itinerary</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                `;
-                                placesContainer.innerHTML += card;
+                                if (itineraryId) {
+                                    card += `
+                        <button class="btn btn-success btn-sm" onclick="addPlaceToItinerary('${p.name}', '${address.replace(/'/g, "\\'")}')">
+                          ➕ Add to Itinerary
+                        </button>`;
+                                }
+
+                                card += `
+                      </div>
+                    </div>
+                  </div>`;
+                                container.innerHTML += card;
                             });
                         });
-                    } else {
-                        console.error("Invalid data format: Expected data with 'children' property", data);
                     }
                 })
-                .catch(error => {
-                    console.error('Error fetching places:', error);
+                .catch(error => console.error("Error fetching places:", error));
+        }
+
+        function addPlaceToItinerary(name, address) {
+            fetch(`https://flavorfind-backend.onrender.com/api/itineraries/${itineraryId}/add-place`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: name, address: address })
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error("Failed to add place");
+                    return res.json();
+                })
+                .then(data => {
+                    alert(`${name} added to itinerary!`);
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("Error adding place to itinerary.");
                 });
-        });
+        }
     </script>
 </body>
 
