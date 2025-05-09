@@ -77,7 +77,7 @@
     <script>
         // Ensure userId is generated if not already set
         if (!localStorage.getItem('userId')) {
-            const newUserId = 'user-' + Math.floor(Math.random() * 1000000);
+            const newUserId = Math.floor(Math.random() * 1000000).toString();  // 🔢 Numeric string
             localStorage.setItem('userId', newUserId);
         }
         const userId = localStorage.getItem('userId');
