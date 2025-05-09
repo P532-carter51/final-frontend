@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,19 +13,37 @@
             object-fit: cover;
             border-radius: 10px;
         }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .card-img-top {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
     </style>
 </head>
 
 <body>
-    <!-- Navbar -->
+
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="index.html">FlavorFind</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="collapse navbar-collapse">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="search.html">Search Places</a></li>
                     <li class="nav-item"><a class="nav-link" href="create-itinerary.html">Create Itinerary</a></li>
@@ -34,7 +53,6 @@
         </div>
     </nav>
 
-    <!-- Itinerary Details -->
     <div class="container py-4">
         <a href="view-itineraries.html" class="btn btn-secondary mb-3">&larr; Back to Itineraries</a>
 
@@ -42,22 +60,21 @@
         <p><strong>City:</strong> <span id="itineraryCity"></span></p>
         <p><strong>Description:</strong> <span id="itineraryDescription"></span></p>
         <p><strong>Status:</strong> <span class="badge bg-warning text-dark">Draft</span></p>
+
         <div class="mb-3">
-            <button class="btn btn-outline-success me-2" onclick="changeState('confirm')" data-bs-toggle="tooltip"
-                data-bs-placement="top" title="Confirm your itinerary once you're happy with the plan.">Confirm</button>
-            <button class="btn btn-outline-primary me-2" onclick="changeState('start')" data-bs-toggle="tooltip"
-                data-bs-placement="top" title="Start the itinerary when your journey begins.">Start</button>
-            <button class="btn btn-outline-dark" onclick="changeState('complete')" data-bs-toggle="tooltip"
-                data-bs-placement="top" title="Mark the itinerary as completed once your trip ends.">Complete</button>
+            <button class="btn btn-outline-success me-2" onclick="changeState('confirm')">Confirm</button>
+            <button class="btn btn-outline-primary me-2" onclick="changeState('start')">Start</button>
+            <button class="btn btn-outline-dark" onclick="changeState('complete')">Complete</button>
         </div>
 
-        <img id="cityImage" class="header-image my-3" src="" alt="City Image">
-        <h4 class="mt-4">Places in this Itinerary</h4>
-        <ul class="list-group" id="placeList"></ul>
-    </div>
+        <!-- Always show the button -->
+        <div class="mb-4">
+            <a id="searchLink" href="#" class="btn btn-primary">🔍 Search Places to Add</a>
+        </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+        <h4 class="mt-4">Places in this Itinerary</h4>
+        <div class="row" id="placeList"></div>
+    </div>
 
     <script>
         const params = new URLSearchParams(window.location.search);
@@ -69,26 +86,35 @@
                 document.getElementById('itineraryName').textContent = data.name;
                 document.getElementById('itineraryCity').textContent = data.city;
                 document.getElementById('itineraryDescription').textContent = data.description || 'No description provided.';
-                document.getElementById('cityImage').src = `https://loremflickr.com/800/300/${encodeURIComponent(data.city || 'travel')}`;
+
+                document.getElementById('searchLink').href = `search.html?itineraryId=${itineraryId}&city=${encodeURIComponent(data.city)}&itineraryName=${encodeURIComponent(data.name)}`;
 
                 const placeList = document.getElementById('placeList');
+                placeList.innerHTML = "";
+
                 if (data.places && data.places.length > 0) {
                     data.places.forEach(place => {
-                        const li = document.createElement('li');
-                        li.className = "list-group-item";
-                        li.textContent = `${place.name} - ${place.address}`;
-                        placeList.appendChild(li);
+                        const card = document.createElement('div');
+                        card.className = 'col-md-4 mb-4';
+                        card.innerHTML = `
+              <div class="card">
+                <img src="${place.imageUrl || 'https://via.placeholder.com/400x200'}" class="card-img-top" alt="${place.name}">
+                <div class="card-body">
+                  <h5 class="card-title">${place.name}</h5>
+                  <p class="card-text">${place.description || 'No description available.'}</p>
+                  <p><strong>Category:</strong> ${place.category} | <strong>Rating:</strong> ${place.rating}</p>
+                  <p><strong>Address:</strong> ${place.address || 'N/A'}</p>
+                  <button class="btn btn-danger btn-sm" onclick="removePlace(${place.id})">Remove</button>
+                </div>
+              </div>
+            `;
+                        placeList.appendChild(card);
                     });
                 } else {
-                    const li = document.createElement('li');
-                    li.className = "list-group-item text-muted";
-                    li.innerHTML = `
-                        No places added yet.<br>
-                        <a href="search.html?itineraryId=${itineraryId}&city=${encodeURIComponent(data.city)}">Search Places</a>
-                            🔍 Search Places to Add
-                        </a>
-                    `;
-                    placeList.appendChild(li);
+                    const placeholder = document.createElement('div');
+                    placeholder.className = "text-muted";
+                    placeholder.innerHTML = `<p>No places added yet.</p>`;
+                    placeList.appendChild(placeholder);
                 }
             })
             .catch(err => {
@@ -120,6 +146,22 @@
                     alert("Failed to update state.");
                 });
         }
+
+        function removePlace(placeId) {
+            fetch(`https://flavorfind-backend.onrender.com/api/itineraries/${itineraryId}/places/${placeId}`, {
+                method: 'DELETE'
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error("Failed to remove place");
+                    location.reload(); // Refresh the page after removal
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("Error removing place.");
+                });
+        }
     </script>
+
 </body>
+
 </html>
