@@ -109,7 +109,7 @@
         }
         const userId = localStorage.getItem('userId');
 
-        fetch(`http://localhost:8080/api/itineraries/user/${userId}`)
+        fetch(`https://flavorfind-backend.onrender.com/api/itineraries/user/${userId}`)
             .then(response => response.json())
             .then(itineraries => {
                 const container = document.getElementById('itineraryResults');
@@ -174,7 +174,7 @@
         }
 
         function exportItinerary(itineraryId, format = 'pdf') {
-            const url = `http://localhost:8080/api/itineraries/${itineraryId}/export?format=${format}`;
+            const url = `https://flavorfind-backend.onrender.com/api/itineraries/${itineraryId}/export?format=${format}`;
             fetch(url)
                 .then(res => {
                     if (!res.ok) throw new Error("Export failed.");
@@ -195,7 +195,7 @@
         function deleteItinerary(itineraryId) {
             if (!confirm("Are you sure you want to delete this itinerary?")) return;
 
-            fetch(`http://localhost:8080/api/itineraries/${itineraryId}`, {
+            fetch(`https://flavorfind-backend.onrender.com/api/itineraries/${itineraryId}`, {
                 method: 'DELETE'
             })
                 .then(res => {

@@ -90,7 +90,7 @@
     const itineraryId = params.get('id');
 
     function fetchItineraryDetails() {
-        fetch(`http://localhost:8080/api/itineraries/${itineraryId}`)
+        fetch(`https://flavorfind-backend.onrender.com/api/itineraries/${itineraryId}`)
             .then(res => res.json())
             .then(data => {
                 document.getElementById('itineraryName').textContent = data.name;
@@ -150,7 +150,7 @@
     }
 
     function changeState(action) {
-        fetch(`http://localhost:8080/api/itineraries/${itineraryId}/${action}`, {
+        fetch(`https://flavorfind-backend.onrender.com/api/itineraries/${itineraryId}/${action}`, {
             method: 'POST'
         })
             .then(res => {
@@ -201,7 +201,7 @@
     }
 
     function removePlace(placeId) {
-        fetch(`http://localhost:8080/api/itineraries/${itineraryId}/places/${placeId}`, {
+        fetch(`https://flavorfind-backend.onrender.com/api/itineraries/${itineraryId}/places/${placeId}`, {
             method: 'DELETE'
         })
             .then(res => {
@@ -215,7 +215,7 @@
     }
 
     function toggleVisited(itineraryId, placeId, visited) {
-        fetch(`http://localhost:8080/api/itineraries/${itineraryId}/places/${placeId}/${visited ? 'visited' : 'not-visited'}`, {
+        fetch(`https://flavorfind-backend.onrender.com/api/itineraries/${itineraryId}/places/${placeId}/${visited ? 'visited' : 'not-visited'}`, {
             method: 'POST'
         })
             .then(res => {

@@ -138,7 +138,7 @@
 
         // Load existing places in itinerary first
         function fetchExistingItineraryPlaces() {
-            fetch(`http://localhost:8080/api/itineraries/${itineraryId}`)
+            fetch(`https://flavorfind-backend.onrender.com/api/itineraries/${itineraryId}`)
                 .then(res => res.json())
                 .then(data => {
                     existingPlaceNames = data.places.map(p => p.name);
@@ -149,7 +149,7 @@
                 });
         }
 
-        fetch("http://localhost:8080/api/places/categories?location=Detroit")
+        fetch("https://flavorfind-backend.onrender.com/api/places/categories?location=Detroit")
             .then(resp => resp.json())
             .then(data => {
                 data.categories.forEach(cat => {
@@ -180,7 +180,7 @@
             const rating = parseFloat(document.getElementById("ratingFilter").value) || null;
             const price = document.getElementById("priceFilter").value;
 
-            let url = `http://localhost:8080/api/places/tree?location=${location}`;
+            let url = `https://flavorfind-backend.onrender.com/api/places/tree?location=${location}`;
             if (category) url += `&category=${encodeURIComponent(category)}`;
             if (rating) url += `&minRating=${rating}`;
             if (price) url += `&price=${price}`;
@@ -255,7 +255,7 @@
         }
 
         function addPlaceToItinerary(btn, name, address, category, rating, imageUrl, url, city) {
-            fetch(`http://localhost:8080/api/itineraries/${itineraryId}/add-place`, {
+            fetch(`https://flavorfind-backend.onrender.com/api/itineraries/${itineraryId}/add-place`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, address, category, rating, imageUrl, url, city })
@@ -276,12 +276,12 @@
         }
 
         function removePlaceFromItinerary(btn, placeName) {
-            fetch(`http://localhost:8080/api/itineraries/${itineraryId}`)
+            fetch(`https://flavorfind-backend.onrender.com/api/itineraries/${itineraryId}`)
                 .then(res => res.json())
                 .then(itinerary => {
                     const place = itinerary.places.find(p => p.name === placeName);
                     if (!place?.id) throw new Error("Place not found");
-                    return fetch(`http://localhost:8080/api/itineraries/${itineraryId}/places/${place.id}`, {
+                    return fetch(`https://flavorfind-backend.onrender.com/api/itineraries/${itineraryId}/places/${place.id}`, {
                         method: 'DELETE'
                     });
                 })
